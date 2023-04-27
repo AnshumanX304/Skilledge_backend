@@ -5,5 +5,8 @@ const router=require("express").Router();
 
 router.post('/register',userCtrl.register);
 router.post('/signin',userCtrl.signin);
+router.post('/sendotp',userCtrl.sendOTP);
+router.post('/verifyOtp',userCtrl.verify);
+router.post('/resetPassword',userCtrl.resetpass);
 
 module.exports=router;

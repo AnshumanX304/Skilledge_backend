@@ -54,16 +54,22 @@ const userCtrl={
                 const accesstoken = createAccessToken({ id: user._id });
                 const refreshtoken = createRefreshToken({ id: user._id });
 
-                res.cookie("refreshtoken", refreshtoken, {
-                httpOnly: true,
-                path: "/user/refresh_token",
-                maxAge: 7 * 24 * 60 * 60 * 1000, //7d
-                });
+                // res.cookie("refreshtoken", refreshtoken, {
+                // httpOnly: true,
+                // path: "/user/refresh_token",
+                // maxAge: 7 * 24 * 60 * 60 * 1000, //7d
+                // });
+
+                // res.cookie("accesstoken",accesstoken,{
+                //   httpOnly: true,
+                //   path: "/user/access_token",
+                //   maxAge: 1* 24 * 60 * 60 * 1000, //1d
+                // })
 
                 res.status(200).json({
                 success: true,
                 msg: "Signup successful !",
-                id:user._id,
+                refreshtoken,
                 accesstoken
                 });
             }
@@ -84,22 +90,27 @@ const userCtrl={
           const user = await UserModel.findOne({ email });
           if (!user) throw new Error("No user found!");
           const result = await bcrypt.compare(password, user.password);
-          if (!result) throw new Error("Invalid credentials!");
+          if (!result) throw new Error("Wrong Password!");
     
           const accesstoken = createAccessToken({ id: user._id });
           const refreshtoken = createRefreshToken({ id: user._id });
 
-          res.cookie("refreshtoken", refreshtoken, {
-            httpOnly: true,
-            path: "/user/refresh_token",
-            maxAge: 7 * 24 * 60 * 60 * 1000, //7d
-          });
+          // res.cookie("refreshtoken", refreshtoken, {
+          //   httpOnly: true,
+          //   path: "/user/refresh_token",
+          //   maxAge: 7 * 24 * 60 * 60 * 1000, //7d
+          // });
 
+          // res.cookie("accesstoken",accesstoken,{
+          //   httpOnly: true,
+          //   path: "/user/access_token",
+          //   maxAge: 1* 24 * 60 * 60 * 1000, //1d
+          // })
           res.status(200).json({
             success: true,
             msg: "Login successful",
-            accesstoken,
-            id:user._id
+            refreshtoken,
+            accesstoken
           });
         } catch (error) {
           res.status(400).json({ success: false, msg: error.message });
@@ -132,6 +143,124 @@ const userCtrl={
             res
               .status(400)
               .json({ success: false, msg: "OTP verification Incomplete" });
+        } catch (error) {
+          res.status(400).json({ success: false, msg: error.message });
+          console.log(error);
+        }
+      },
+      sendOTP: async (req, res) => {
+        try {
+          // console.log(req.route.path);
+          const { email } = req.body;
+    
+          const user = await UserModel.findOne({ email });
+          if (!user) throw new Error("No user found!");
+          const userotp = await otpModel.findOne({ email });
+          if (!userotp) {
+            const userotp = otpModel({
+              createdAt: new Date(),
+              email,
+              otp: null,
+            });
+            await userotp.save();
+            userotp.otp = otpGenerator.generate(4, {
+              upperCaseAlphabets: false,
+              specialChars: false,
+              lowerCaseAlphabets: false,
+            });
+            await userotp.save();
+          }
+          
+          if(userotp){
+            userotp.otp = otpGenerator.generate(4, {
+            upperCaseAlphabets: false,
+            specialChars: false,
+            lowerCaseAlphabets: false,
+          });
+          await userotp.save();
+    
+          const mailoptions = {
+            from: "skilledgetechnology@gmail.com",
+            to: email,
+            subject: "Skilledge Verification OTP",
+            html: `
+            <div
+              class="container"
+              style="max-width: 90%; margin: auto; padding-top: 20px"
+            >
+              <h2>Skilledge OTP verification</h2>
+              <h4>You are about change your account password.</h4>
+              <p style="margin-bottom: 30px;">Please enter this OTP to change password.</p>
+              <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${userotp.otp}</h1>
+         </div>
+          `,
+          };
+          transporter.sendMail(mailoptions, (err, info) => {
+            if (err) {
+              console.log(err);
+              throw new Error("Mail not sent");
+            } else {
+              console.log("mail sent");
+            }
+          });
+        }
+          res.status(200).json({
+            success: true,
+            msg: "mail sent",
+          });
+        } catch (error) {
+          res.status(400).json({ success: false, msg: error.message });
+          console.log(error);
+        }
+      },
+      verify: async (req, res) => {
+        try {
+          // console.log(req.route.path);
+          const { email, otp } = req.body;
+          const user = await UserModel.findOne({email});
+          const userotp = await otpModel.findOne({ email });
+          // console.log(user);
+          // console.log(userotp);
+          if (!userotp) throw new Error("OTP timed out.");
+          if (!user) throw new Error("No user found!");
+          if (userotp.otp == otp) {
+            res.status(200).json({
+              success: true,
+              msg: "user verified",
+              id:user._id,
+            });
+          } else res.status(400).json({ success: false, msg: "OTP incorrect" });
+        } catch (error) {
+          res.status(400).json({ success: false, msg: error.message });
+          console.log(error);
+        }
+      },
+      resetpass: async (req, res) => {
+        try {
+          // console.log(req.route.path);
+          const { email, password } = req.body;
+          const user = await UserModel.findOne({ email });
+          // const userotp = await otpModel.findOne({ email });
+          // if (!userotp) throw new Error("Verification Timed OUT");
+          if (!user) throw new Error("No user found!");
+    
+          // if (userotp.verify == true) {
+            const result = await bcrypt.compare(password, user.password);
+            if (result) throw new Error("Please Change to new Password");
+            const passwordHash = await bcrypt.hash(password, 12);
+            user.password = passwordHash;
+            user.save();
+            // userotp.verify = false;
+            // userotp.save();
+    
+            res.status(200).json({
+              success: true,
+              msg: "password changed successfully",
+            });
+          // } else
+          //   res
+          //     .status(400)
+          //     .json({ success: false, msg: "OTP verification Incomplete" });
         } catch (error) {
           res.status(400).json({ success: false, msg: error.message });
           console.log(error);

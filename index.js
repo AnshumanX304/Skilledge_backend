@@ -4,7 +4,12 @@ require('dotenv').config();
 const app=express();
 const CookieParser=require("cookie-parser");
 const cors=require('cors');
-app.use(cors());
+const corsOrigin ={
+    origin:'http://localhost:3000', //or whatever port your frontend is using
+    credentials:true,            
+    optionSuccessStatus:200
+}
+app.use(cors(corsOrigin));
 dbconnection();
 app.use(express.json());
 app.use(CookieParser());
