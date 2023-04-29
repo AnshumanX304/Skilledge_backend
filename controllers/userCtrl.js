@@ -1,8 +1,9 @@
 const UserModel=require("../models/userModel");
 const otpModel = require("../models/otpModel");
 const bcrypt=require("bcrypt");
+const mongoose = require("mongoose");
 const jwt=require("jsonwebtoken");
-
+const courseModel=require("../models/courseModel");
 const nodemailer=require("nodemailer");
 const otpGenerator = require("otp-generator");
 require("dotenv").config();
@@ -119,7 +120,7 @@ const userCtrl={
       },
       refreshToken: (req, res) => {
       try {
-          const rf_token = req.cookies.refreshtoken;
+          const rf_token = req.body.refreshtoken;
           if (!rf_token)
             return res.status(400).json({ msg: "Please Login or Register" });
 
@@ -252,6 +253,49 @@ const userCtrl={
           console.log(error);
         }
       },
+      addcourse:async(req,res)=>{
+        try{
+          let{topic,description,categories,price}=req.body;
+          let token=req.header['accesstoken'] || req.headers['authorization'];
+          token=token.replace(/^Bearer\s+/,"");
+          const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+          const _id=decode.id;
+          const id=mongoose.Types.ObjectId(_id);
+          let filepath=null;
+          if(req.file!=undefined){
+            filepath = 'uploads/' + req.file.filename;
+          }
+          if(!id)throw new Error("login or register !");
+          const user=await UserModel.findById(id);
+          if(!user){
+            throw new Error("no such user found !");
+          }
+
+          const course=await courseModel.create({
+            educatorid:id,
+            topic,
+            description,
+            categories,
+            price
+
+          })
+          await UserModel.findByIdAndUpdate(id,{
+            $addToSet:{myCourses:course._id}
+           });
+
+           res.status(200).json({
+            success:true,
+            msg:"Course added successfully !",
+            });
+
+
+        }
+        catch(err){
+          res.status(400).json({success:false,msg:err.message});
+          console.log(err);
+        }
+
+      },
       resetpass: async (req, res) => {
         try {
           // console.log(req.route.path);
@@ -283,6 +327,18 @@ const userCtrl={
           console.log(error);
         }
       },
+      getcourse:async(res)=>{
+        try{
+          res.status(200).json({
+            success:true,
+            msg:"home data ran"
+          })
+        }
+        catch(err){
+          res.status(400).json({ success: false, msg: error.message });
+          console.log(err);
+        }
+      }
 
 
 

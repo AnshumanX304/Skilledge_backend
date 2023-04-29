@@ -9,6 +9,17 @@ const corsOrigin ={
     credentials:true,            
     optionSuccessStatus:200
 }
+// const multer=require('multer');
+// const storage=multer.diskStorage({
+//         destination:(req,res,cb)=>{
+//                 cb(null,'images');
+//         },
+//         filename:(req,file,cb)=>{
+//                 console.log(file);
+//                 cb(null,Date.now()+path.extname(file.originalname))
+//         }
+// })
+// const upload=multer({storage:storage});
 app.use(cors(corsOrigin));
 dbconnection();
 app.use(express.json());
