@@ -10,6 +10,7 @@ const userSchema=mongoose.Schema({
     //     required:true,
 
     // },
+    
     username:{
         type:String,
         required:true,
@@ -24,7 +25,11 @@ const userSchema=mongoose.Schema({
         type:String,
         required:true,
         unique:true
-      }
+      },
+      myCourses:[{
+        type:mongoose.SchemaTypes.ObjectId,
+        ref:"courseModel"
+      }]
 
 });
 
