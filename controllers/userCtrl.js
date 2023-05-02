@@ -118,21 +118,30 @@ const userCtrl={
           console.log(error);
         }
       },
-      refreshToken: (req, res) => {
+      refreshToken: async(req, res) => {
       try {
-          const rf_token = req.body.refreshtoken;
-          if (!rf_token)
-            return res.status(400).json({ msg: "Please Login or Register" });
+        
+        let token = req.body.refreshtoken;
+       
+        console.log(token);
+        
+       
 
-          jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-            if (err) return res.status(400).json({ msg: "Please Login or Register" });
+      
 
+          if (!token)
+            return res.status(401).json({ msg: "Please Login or Register" });
+
+          jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+            if (err) return res.status(401).json({ msg: "Please Login or Register" });
+
+            console.log('access token expired !');
             const accesstoken = createAccessToken({ id: user.id });
 
             res.json({ accesstoken });
           });
         } catch (err) {
-          return res.status(500).json({ msg: err.message });
+          return res.status(400).json({ msg: err.message });
         }
       },
       resetpass: async (req, res) => {
@@ -295,6 +304,24 @@ const userCtrl={
           console.log(err);
         }
 
+        
+      },
+      getcourse:async(req,res)=>{
+        try{
+          console.log("hello");
+
+
+          res.status(200).json({
+            success:true,
+            msg:"courses sent!"
+          });
+
+        }
+        catch(error){
+          res.status(400).json({success:false,msg:error.message});
+          console.log(error);
+        }
+      
       },
       resetpass: async (req, res) => {
         try {
@@ -326,18 +353,7 @@ const userCtrl={
           res.status(400).json({ success: false, msg: error.message });
           console.log(error);
         }
-      },
-      getcourse:async(res)=>{
-        try{
-          res.status(200).json({
-            success:true,
-            msg:"home data ran"
-          })
-        }
-        catch(err){
-          res.status(400).json({ success: false, msg: error.message });
-          console.log(err);
-        }
+      
       }
 
 

@@ -11,6 +11,7 @@ router.post('/verifyOtp',userCtrl.verify);
 router.post('/resetPassword',userCtrl.resetpass);
 router.get('/getcourses',auth,userCtrl.getcourse);
 router.post('/addcourse',Upload.uploadImg.single('images'),userCtrl.addcourse);
+router.post('/refreshtoken',userCtrl.refreshToken);
 
 
 module.exports=router;
