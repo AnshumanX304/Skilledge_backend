@@ -10,7 +10,16 @@ router.post('/sendotp',userCtrl.sendOTP);
 router.post('/verifyOtp',userCtrl.verify);
 router.post('/resetPassword',userCtrl.resetpass);
 router.get('/getcourses',auth,userCtrl.getcourse);
-router.post('/addcourse',Upload.uploadImg.single('images'),userCtrl.addcourse);
+router.post('/addcourse',auth,Upload.uploadImg.fields([
+    {
+        name:"video",
+        maxCount: 1
+    },
+    {
+        name:"image",
+        maxCount: 1 
+    }
+]),userCtrl.addcourse);
 router.post('/refreshtoken',userCtrl.refreshToken);
 
 

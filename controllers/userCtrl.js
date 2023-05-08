@@ -264,16 +264,24 @@ const userCtrl={
       },
       addcourse:async(req,res)=>{
         try{
-          let{topic,description,categories,price}=req.body;
+          let{topic,description,categories,price,lesson}=req.body;
+          
           let token=req.header['accesstoken'] || req.headers['authorization'];
           token=token.replace(/^Bearer\s+/,"");
           const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
           const _id=decode.id;
           const id=mongoose.Types.ObjectId(_id);
-          let filepath=null;
-          if(req.file!=undefined){
-            filepath = 'uploads/' + req.file.filename;
+          let imgpath=null;
+          let vidpath=null
+          // console.log(req.files.video[0].filename);
+          // console.log(req.files.image[0].filename);
+          if(req.files.video!=undefined){
+            vidpath = 'uploads/Video/' + req.files.video[0].filename;
           }
+          if(req.files.image!=undefined){
+            imgpath = 'uploads/Thumbnail/' + req.files.image[0].filename;
+          }
+
           if(!id)throw new Error("login or register !");
           const user=await UserModel.findById(id);
           if(!user){
@@ -282,10 +290,13 @@ const userCtrl={
 
           const course=await courseModel.create({
             educatorid:id,
+            imgpath,
             topic,
             description,
             categories,
-            price
+            price,
+            lesson,
+            vidpath
 
           })
           await UserModel.findByIdAndUpdate(id,{

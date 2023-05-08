@@ -2,6 +2,7 @@ const express=require('express');
 const dbconnection=require("./dbconnect/dbconnection");
 require('dotenv').config();
 const app=express();
+const bodyParser = require('body-parser');
 const CookieParser=require("cookie-parser");
 const cors=require('cors');
 const corsOrigin ={
@@ -23,6 +24,7 @@ const corsOrigin ={
 app.use(cors(corsOrigin));
 dbconnection();
 app.use(express.json());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(CookieParser());
 
 app.use('/user',require('./router/userRouter'));
