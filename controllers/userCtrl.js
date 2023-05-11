@@ -240,6 +240,24 @@ const userCtrl={
           console.log(error);
         }
       },
+      sendcourse:async(req,res)=>{
+         
+        let token=req.header['accesstoken'] || req.headers['authorization'];
+        token=token.replace(/^Bearer\s+/,"");
+        const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+        const _id=decode.id;
+        const id=mongoose.Types.ObjectId(_id);
+
+        const userdetails=await UserModel.findById(_id).populate('myCourses');
+        
+        const {myCourses}=userdetails;
+        res.status(200).json({
+          success: true,
+          msg: "my course sent !",
+          myCourses
+        })
+        
+      },
       verify: async (req, res) => {
         try {
           // console.log(req.route.path);
@@ -297,7 +315,6 @@ const userCtrl={
             price,
             lesson,
             vidpath
-
           })
           await UserModel.findByIdAndUpdate(id,{
             $addToSet:{myCourses:course._id}

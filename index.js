@@ -10,6 +10,13 @@ const corsOrigin ={
     credentials:true,            
     optionSuccessStatus:200
 }
+const fs=require('fs');
+if(!fs.existsSync('./uploads')){
+        fs.mkdirSync('./uploads');
+}
+app.use(express.static(__dirname + '/public'));
+
+app.use('/uploads', express.static('uploads'));
 // const multer=require('multer');
 // const storage=multer.diskStorage({
 //         destination:(req,res,cb)=>{
