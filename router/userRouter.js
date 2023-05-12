@@ -22,6 +22,7 @@ router.post('/addcourse',auth,Upload.uploadImg.fields([
 ]),userCtrl.addcourse);
 router.post('/refreshtoken',userCtrl.refreshToken);
 router.get('/sendcourse',auth,userCtrl.sendcourse);
+router.post('/getcoursedetail',userCtrl.sendcoursedetail)
 
 
 module.exports=router;

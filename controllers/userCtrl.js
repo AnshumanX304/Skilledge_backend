@@ -382,6 +382,25 @@ const userCtrl={
           console.log(error);
         }
       
+      },
+      sendcoursedetail:async(req,res)=>{
+        try{
+          const {id}=req.body
+          const _id=mongoose.Types.ObjectId(id);
+          const coursedetail=await courseModel.findById({_id});
+          if(!coursedetail)throw new Error("No course found !");
+          res.status(200).json({
+            success: true,
+            coursedetail,
+            msg: "Course details sent successfully !",
+          });
+
+
+        }
+        catch(error){
+          res.status(400).json({success:false,msg:error.message});
+          console.log(error);
+        }
       }
 
 
