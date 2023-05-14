@@ -1,5 +1,6 @@
 const UserModel=require("../models/userModel");
 const otpModel = require("../models/otpModel");
+const vidModel=require("../models/videoModel");
 const bcrypt=require("bcrypt");
 const mongoose = require("mongoose");
 const jwt=require("jsonwebtoken");
@@ -282,7 +283,7 @@ const userCtrl={
       },
       addcourse:async(req,res)=>{
         try{
-          let{topic,description,categories,price,lesson}=req.body;
+          let{topic,description,detailed_description,categories,price,lesson}=req.body;
           
           let token=req.header['accesstoken'] || req.headers['authorization'];
           token=token.replace(/^Bearer\s+/,"");
@@ -311,14 +312,25 @@ const userCtrl={
             imgpath,
             topic,
             description,
+            detailed_description,
             categories,
-            price,
+            price
+            // lesson,
+            // vidpath
+          })
+
+          const Lesson=await vidModel.create({
             lesson,
             vidpath
           })
+
           await UserModel.findByIdAndUpdate(id,{
             $addToSet:{myCourses:course._id}
            });
+           
+           await courseModel.findByIdAndUpdate(course._id,{
+            $addToSet:{lessons:Lesson._id}
+           })
 
            res.status(200).json({
             success:true,
@@ -385,12 +397,23 @@ const userCtrl={
       },
       sendcoursedetail:async(req,res)=>{
         try{
-          const {id}=req.body
-          const _id=mongoose.Types.ObjectId(id);
+          const {id}=req.body;
+          
+          let _id=mongoose.Types.ObjectId(id);
+    
+          
           const coursedetail=await courseModel.findById({_id});
+          const educatorid=coursedetail.educatorid;
+          _id=educatorid
+          
+          const educatordetail=await UserModel.findById({_id});
+
+          const username=educatordetail.username;
+          
           if(!coursedetail)throw new Error("No course found !");
           res.status(200).json({
             success: true,
+            username,
             coursedetail,
             msg: "Course details sent successfully !",
           });
