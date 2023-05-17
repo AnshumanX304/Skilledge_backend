@@ -346,6 +346,69 @@ const userCtrl={
 
         
       },
+      addlesson:async(req,res)=>{
+        // const userdetails=await UserModel.findById(_id).populate('myCourses');
+
+        try{
+            let {id,lesson}=req.body;
+            let vidpath=null
+            console.log(req.file);
+              // console.log(req.files.video[0].filename);
+              // console.log(req.files.image[0].filename);
+            if(req.file!=undefined){
+                vidpath = 'uploads/Video/' + req.file.filename;
+            }
+
+            let _id=mongoose.Types.ObjectId(id)
+
+            
+            const Lesson=await vidModel.create({
+              _id,
+              lesson,
+              vidpath
+            })
+
+            await courseModel.findByIdAndUpdate(id,{
+              $addToSet:{lessons:Lesson._id}
+            })
+
+            Lesson.save();
+
+            res.status(200).json({
+              success:true,
+              msg:"lesson added successfully !"
+            })
+          }
+          catch(err){
+            res.status(400).json({
+              success:false,
+              msg:err.message
+            })
+          }
+      },
+      getVideo:async(req,res)=>{
+        try{
+          const id=req.params.id;
+          const _id=mongoose.Types.ObjectId(id);
+          const videoDetails=await vidModel.findById({_id});
+          if(!id){
+            throw new Error("No video lesson found !");
+          }
+          res.status(200).json({
+            success:true,
+            videoDetails
+          })
+
+
+        }
+        catch(err){
+          res.status(400).json({
+            success:false,
+            msg:err.message
+          })
+        }
+
+      },
       getcourse:async(req,res)=>{
         try{
           console.log("hello");
