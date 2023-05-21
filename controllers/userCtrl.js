@@ -350,9 +350,9 @@ const userCtrl={
         // const userdetails=await UserModel.findById(_id).populate('myCourses');
 
         try{
-            let {id,lesson}=req.body;
-            let vidpath=null
-            console.log(req.file);
+            let {lesson}=req.body;
+            let id=req.params.id;
+            let vidpath=null;
               // console.log(req.files.video[0].filename);
               // console.log(req.files.image[0].filename);
             if(req.file!=undefined){
@@ -363,7 +363,7 @@ const userCtrl={
 
             
             const Lesson=await vidModel.create({
-              _id,
+              courseid:_id,
               lesson,
               vidpath
             })
@@ -458,6 +458,24 @@ const userCtrl={
         }
       
       },
+      // watchVideo:async(req,res)=>{
+
+      //   try{
+      //     const _id=req.params.id;
+      //     console.log(_id);
+      //     const id=mongoose.Types.ObjectId(_id);
+      //     const videoDetails=await vidModel.findById(id);
+      //     console.log(videoDetails);
+
+
+      //   }
+      //   catch(err){
+      //     console.log(err);
+      //   }
+
+
+
+      // },
       sendcoursedetail:async(req,res)=>{
         try{
           const {id}=req.body;

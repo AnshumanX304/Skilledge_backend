@@ -23,8 +23,11 @@ router.post('/addcourse',auth,Upload.uploadImg.fields([
 router.post('/refreshtoken',userCtrl.refreshToken);
 router.get('/sendcourse',auth,userCtrl.sendcourse);
 router.post('/getcoursedetail',auth,userCtrl.sendcoursedetail);
-router.post('/addlesson',auth,Upload.uploadImg.single('video'),userCtrl.addlesson);
+router.post('/addlesson/:id',auth,Upload.uploadImg.single('video'),userCtrl.addlesson);
 router.get('/getvideo/:id',auth,userCtrl.getVideo);
+// router.get('/watchvideos/:id',auth,userCtrl.watchVideo);
+
+
 
 
 module.exports=router;
