@@ -27,6 +27,7 @@ router.post('/addlesson/:id',auth,Upload.uploadImg.single('video'),userCtrl.addl
 router.get('/getvideo/:id',auth,userCtrl.getVideo);
 router.post('/addtocart/:id',auth,userCtrl.addtocart);
 router.post('/cartcount',auth,userCtrl.sendcartcount);
+router.get('/cartitems',auth,userCtrl.cartitems);
 // router.get('/watchvideos/:id',auth,userCtrl.watchVideo);
 
 

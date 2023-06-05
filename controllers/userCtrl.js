@@ -466,6 +466,26 @@ const userCtrl={
         }
       
       },
+      cartitems:async(req,res)=>{
+        try{
+          let token=req.header['accesstoken'] || req.headers['authorization'];
+          token=token.replace(/^Bearer\s+/,"");
+          const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+          const _id=decode.id;
+         
+          const id=mongoose.Types.ObjectId(_id);
+          const userdetails=await UserModel.findById(id).populate('cart');
+          const {cart}=userdetails;
+          res.status(200).json({
+            cart,
+            success:true,
+            msg:"cart items sent !"
+          })
+        }
+        catch(error){
+          res.status(400).json({ success: false, msg: error.message });
+        }
+      },
       sendcartcount:async(req,res)=>{
         try{
           let token=req.header['accesstoken'] || req.headers['authorization'];
