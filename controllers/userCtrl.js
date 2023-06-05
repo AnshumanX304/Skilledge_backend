@@ -249,7 +249,7 @@ const userCtrl={
         const _id=decode.id;
         const id=mongoose.Types.ObjectId(_id);
 
-        const userdetails=await UserModel.findById(_id).populate('myCourses');
+        const userdetails=await UserModel.findById(id).populate('myCourses');
         
         const {myCourses}=userdetails;
         res.status(200).json({
@@ -284,6 +284,7 @@ const userCtrl={
       addcourse:async(req,res)=>{
         try{
           let{topic,description,detailed_description,categories,price,lesson}=req.body;
+          console.log(lesson);
           
           let token=req.header['accesstoken'] || req.headers['authorization'];
           token=token.replace(/^Bearer\s+/,"");
@@ -320,6 +321,7 @@ const userCtrl={
           })
 
           const Lesson=await vidModel.create({
+            courseid:course._id,
             lesson,
             vidpath
           })
@@ -409,12 +411,18 @@ const userCtrl={
         }
 
       },
-      getcourse:async(req,res)=>{
+      gethomecourses:async(req,res)=>{
         try{
-          console.log("hello");
-
+          // let token=req.header['accesstoken'] || req.headers['authorization'];
+          // token=token.replace(/^Bearer\s+/,"");
+          // const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+          // const _id=decode.id;
+          // const id=mongoose.Types.ObjectId(_id);
+          const homeCourses=await courseModel.find();
+          
 
           res.status(200).json({
+            homeCourses,
             success:true,
             msg:"courses sent!"
           });
@@ -458,27 +466,77 @@ const userCtrl={
         }
       
       },
-      // watchVideo:async(req,res)=>{
+      sendcartcount:async(req,res)=>{
+        try{
+          let token=req.header['accesstoken'] || req.headers['authorization'];
+          token=token.replace(/^Bearer\s+/,"");
+          const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+          const _id=decode.id;
+         
+          const id=mongoose.Types.ObjectId(_id);
 
-      //   try{
-      //     const _id=req.params.id;
-      //     console.log(_id);
-      //     const id=mongoose.Types.ObjectId(_id);
-      //     const videoDetails=await vidModel.findById(id);
-      //     console.log(videoDetails);
+          const userdetails=await UserModel.findById(id);
+          const {cart}=userdetails;
+          let count=0;
+          cart.forEach(cartlist=>{
+            count++;
+          })
+          res.status(200).json({
+            count,
+            success:true,
+            msg:"cart count sent !"
+          })
+      
+        }
+        catch(error){
+          res.status(400).json({success:false,msg:error.message});
+          console.log(error);
+        }
+      },
+      addtocart:async(req,res)=>{
+        try{
+          const courseid=req.params.id;
+          const finalcourseid=mongoose.Types.ObjectId(courseid);
+          console.log(finalcourseid);
+
+          let token=req.header['accesstoken'] || req.headers['authorization'];
+          token=token.replace(/^Bearer\s+/,"");
+          const decode=await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+          const _id=decode.id;
+         
+          const id=mongoose.Types.ObjectId(_id);
+      
+          
+          const userdetails=await UserModel.findById(id);
+          if(!userdetails)throw new Error("User does not exists !")
+          
+          const {cart}=userdetails;
+          if(cart.indexOf(finalcourseid)!=-1){
+            throw new Error("Item already added in cart !");
+          }
+      
 
 
-      //   }
-      //   catch(err){
-      //     console.log(err);
-      //   }
+          // console.log(newcart);
+          await UserModel.findByIdAndUpdate(id,{
+            $addToSet:{cart:finalcourseid}
+           })
 
+          res.status(200).json({
+            success:true,
+            msg:"Item added to cart !"
+          })
 
-
-      // },
+        }
+        catch(error){
+          res.status(400).json({ success: false, msg: error.message });
+          console.log(error);
+        }
+      },
       sendcoursedetail:async(req,res)=>{
         try{
           const {id}=req.body;
+          // console.log(id);
           
           let _id=mongoose.Types.ObjectId(id);
     

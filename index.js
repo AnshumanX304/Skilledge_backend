@@ -45,10 +45,10 @@ app.get('/user/watchvideos/:id',async (req,res)=>{
                         throw new Error('no such video found !');
                 }
                 const stat=fs.statSync(vidpath);
-                console.log(stat);
+                // console.log(stat);
                 const fileSize=stat.size;
                 const range=req.headers.range;
-                console.log(range);
+                // console.log(range);
                 if(range){
                         const parts = range.replace(/bytes=/, '').split('-')
                         const start = parseInt(parts[0], 10);

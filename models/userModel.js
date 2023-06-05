@@ -29,6 +29,10 @@ const userSchema=mongoose.Schema({
       myCourses:[{
         type:mongoose.SchemaTypes.ObjectId,
         ref:"courseModel"
+      }],
+      cart:[{
+        type:mongoose.SchemaTypes.ObjectId,
+        ref:"courseModel"
       }]
 
 });
